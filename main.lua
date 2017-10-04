@@ -4,25 +4,43 @@ function newSquare(x, y)
 	return {
 		x = x,
 		y = y,
+		w = 50,
+		h = 50,
 		update = function(self, dt)
 			self.x = self.x + 100 * dt
 			self.y = self.y + 200 * dt
-		end,
-		draw = function(self)
-			love.graphics.rectangle('fill', self.x, self.y, 50, 50)
 		end,
 	}
 end
 
 local world = ochre.new()
 
-function world:onAdd(entity, message)
-	print('spawned entity: ' .. tostring(entity) .. ' (message: ' .. message .. ')')
-end
+world.systems.onAdd = {
+	debug = function(w, e, m)
+		print('spawned entity: ' .. tostring(e) .. ' (message: ' .. m .. ')')
+	end
+}
 
-function world:onRemove(entity)
-	print('removed entity: ' .. tostring(entity))
-end
+world.systems.onRemove = {
+	debug = function(w, e)
+		print('removed entity: ' .. tostring(e))
+	end
+}
+
+world.systems.draw = {
+	bbox = function(w, e)
+		if e.x and e.y and e.w and e.h then
+			love.graphics.setColor(255, 255, 255)
+			love.graphics.rectangle('fill', e.x, e.y, e.w, e.h)
+		end
+	end,
+	circle = function(w, e)
+		if e.x and e.y then
+			love.graphics.setColor(255, 0, 0)
+			love.graphics.circle('fill', e.x, e.y, 8)
+		end
+	end,
+}
 
 world:add(newSquare(50, 50), 'hi')
 world:add(newSquare(50, 250), 'hello')
