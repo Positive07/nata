@@ -10,10 +10,12 @@ function World:onRemove(entity) end
 -- main API
 
 function World:add(entity, ...)
-	self:onAdd(entity, ...)
-	for _, system in pairs(self.systems.onAdd or {}) do
-		system(self, entity, ...)
+	if self.systems.onAdd then
+		for i = 1, #self.systems.onAdd do
+			self.systems.onAdd[i](self, entity, ...)
+		end
 	end
+	self:onAdd(entity, ...)
 	table.insert(self._entities, entity)
 	return entity
 end
@@ -31,8 +33,10 @@ end
 
 function World:call(event, ...)
 	for _, entity in pairs(self._entities) do
-		for _, system in pairs(self.systems[event] or {}) do
-			system(self, entity, ...)
+		if self.systems[event] then
+			for i = 1, #self.systems[event] do
+				self.systems[event][i](self, entity, ...)
+			end
 		end
 		if entity[event] then
 			entity[event](entity, ...)
@@ -44,10 +48,12 @@ function World:remove(f)
 	f = f or function() return true end
 	for i = #self._entities, 1, -1 do
 		if f(self._entities[i]) then
-			self:onRemove(self._entities[i])
-			for _, system in pairs(self.systems.onRemove or {}) do
-				system(self, self._entities[i])
+			if self.systems.onRemove then
+				for i = 1, #self.systems.onRemove do
+					self.systems.onRemove[i](self, entity)
+				end
 			end
+			self:onRemove(self._entities[i])
 			table.remove(self._entities, i)
 		end
 	end

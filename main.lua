@@ -16,25 +16,25 @@ end
 local world = ochre.new()
 
 world.systems.onAdd = {
-	debug = function(w, e, m)
+	function(w, e, m)
 		print('spawned entity: ' .. tostring(e) .. ' (message: ' .. m .. ')')
 	end
 }
 
 world.systems.onRemove = {
-	debug = function(w, e)
+	function(w, e)
 		print('removed entity: ' .. tostring(e))
 	end
 }
 
 world.systems.draw = {
-	bbox = function(w, e)
+	function(w, e)
 		if e.x and e.y and e.w and e.h then
 			love.graphics.setColor(255, 255, 255)
 			love.graphics.rectangle('fill', e.x, e.y, e.w, e.h)
 		end
 	end,
-	circle = function(w, e)
+	function(w, e)
 		if e.x and e.y then
 			love.graphics.setColor(255, 0, 0)
 			love.graphics.circle('fill', e.x, e.y, 8)
