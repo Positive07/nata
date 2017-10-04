@@ -1,6 +1,12 @@
 local ochre = {}
 
-local World = {}
+local World = setmetatable({}, {
+	__index = function(self, k)
+		return rawget(self, k) or function(self, ...)
+			self:call(k, ...)
+		end
+	end
+})
 
 -- internal functions
 

@@ -48,7 +48,7 @@ world:add(newSquare(350, 100), 'nice day')
 world:add(newSquare(650, 25), 'fuck off')
 
 function love.update(dt)
-	world:call('update', dt)
+	world:update(dt)
 	world:remove(function(e) return e.delete end)
 end
 
@@ -65,7 +65,7 @@ function love.keypressed(key)
 end
 
 function love.draw()
-	world:call 'draw'
+	world:draw()
 	love.graphics.print(tostring(#world:get(function(e)
 		return e.x > 400
 	end)))
