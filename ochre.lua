@@ -30,8 +30,8 @@ end
 
 function World:call(entity, event, ...)
 	if self.systems[event] then
-		for i = 1, #self.systems[event] do
-			self.systems[event][i](self.parent, entity, ...)
+		for _, system in ipairs(self.systems[event])
+			system(self.parent, entity, ...)
 		end
 	end
 end
@@ -45,8 +45,9 @@ end
 function World:remove(f)
 	f = f or function() return true end
 	for i = #self._entities, 1, -1 do
-		if f(self._entities[i]) then
-			self:call(self._entities[i], 'onRemove')
+		local entity = self._entities[i]
+		if f(entity) then
+			self:call(entity, 'onRemove')
 			table.remove(self._entities, i)
 		end
 	end
