@@ -10,48 +10,20 @@ function newSquare(x, y)
 			self.x = self.x + 100 * dt
 			self.y = self.y + 200 * dt
 		end,
+		draw = function(self)
+			love.graphics.setColor(255, 255, 255)
+			love.graphics.rectangle('fill', self.x, self.y,
+				self.w, self.h)
+		end,
 	}
 end
 
-local world = ochre.new {
-	onAdd = {
-		function(w, e, m)
-			print('spawned entity: ' .. tostring(e) .. ' (message: ' .. m .. ')')
-		end
-	},
+local world = ochre.new(ochre.systems.simple)
 
-	onRemove = {
-		function(w, e)
-			print('removed entity: ' .. tostring(e))
-		end
-	},
-
-	update = {
-		function(w, e, dt)
-			e:update(dt)
-		end,
-	},
-
-	draw = {
-		function(w, e)
-			if e.x and e.y and e.w and e.h then
-				love.graphics.setColor(255, 255, 255)
-				love.graphics.rectangle('fill', e.x, e.y, e.w, e.h)
-			end
-		end,
-		function(w, e)
-			if e.x and e.y then
-				love.graphics.setColor(255, 0, 0)
-				love.graphics.circle('fill', e.x, e.y, 8)
-			end
-		end,
-	},
-}
-
-world:add(newSquare(50, 50), 'hi')
-world:add(newSquare(50, 250), 'hello')
-world:add(newSquare(350, 100), 'nice day')
-world:add(newSquare(650, 25), 'fuck off')
+world:add(newSquare(50, 50))
+world:add(newSquare(50, 250))
+world:add(newSquare(350, 100))
+world:add(newSquare(650, 25))
 
 function love.update(dt)
 	world:update(dt)
@@ -72,7 +44,4 @@ end
 
 function love.draw()
 	world:draw()
-	love.graphics.print(tostring(#world:get(function(e)
-		return e.x > 400
-	end)))
 end

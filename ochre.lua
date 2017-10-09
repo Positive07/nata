@@ -62,4 +62,24 @@ function ochre.new(systems)
 	})
 end
 
+ochre.systems = {
+	simple = {
+		update = {
+			function(w, e, dt)
+				if e.update then e:update(dt) end
+			end
+		},
+		draw = {
+			function(w, e)
+				if e.draw then e:draw() end
+			end
+		},
+		onRemove = {
+			function(w, e)
+				if e.onRemove then e:onRemove() end
+			end
+		},
+	}
+}
+
 return ochre
