@@ -30,7 +30,7 @@ end
 
 function World:call(entity, event, ...)
 	if self.systems[event] then
-		for _, system in ipairs(self.systems[event])
+		for _, system in ipairs(self.systems[event]) do
 			system(self.parent, entity, ...)
 		end
 	end
