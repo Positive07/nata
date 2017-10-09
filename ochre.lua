@@ -31,7 +31,7 @@ end
 function World:call(entity, event, ...)
 	if self.systems[event] then
 		for i = 1, #self.systems[event] do
-			self.systems[event][i](self, entity, ...)
+			self.systems[event][i](self.parent, entity, ...)
 		end
 	end
 end
@@ -55,6 +55,7 @@ end
 function ochre.new(systems)
 	return setmetatable({
 		systems = systems or {},
+		parent = self,
 		_entities = {},
 	}, {
 		__index = World,
