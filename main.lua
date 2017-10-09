@@ -27,6 +27,12 @@ world.systems.onRemove = {
 	end
 }
 
+world.systems.update = {
+	function(w, e, dt)
+		e:update(dt)
+	end,
+}
+
 world.systems.draw = {
 	function(w, e)
 		if e.x and e.y and e.w and e.h then
