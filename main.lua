@@ -13,39 +13,39 @@ function newSquare(x, y)
 	}
 end
 
-local world = ochre.new()
-
-world.systems.onAdd = {
-	function(w, e, m)
-		print('spawned entity: ' .. tostring(e) .. ' (message: ' .. m .. ')')
-	end
-}
-
-world.systems.onRemove = {
-	function(w, e)
-		print('removed entity: ' .. tostring(e))
-	end
-}
-
-world.systems.update = {
-	function(w, e, dt)
-		e:update(dt)
-	end,
-}
-
-world.systems.draw = {
-	function(w, e)
-		if e.x and e.y and e.w and e.h then
-			love.graphics.setColor(255, 255, 255)
-			love.graphics.rectangle('fill', e.x, e.y, e.w, e.h)
+local world = ochre.new {
+	onAdd = {
+		function(w, e, m)
+			print('spawned entity: ' .. tostring(e) .. ' (message: ' .. m .. ')')
 		end
-	end,
-	function(w, e)
-		if e.x and e.y then
-			love.graphics.setColor(255, 0, 0)
-			love.graphics.circle('fill', e.x, e.y, 8)
+	},
+
+	onRemove = {
+		function(w, e)
+			print('removed entity: ' .. tostring(e))
 		end
-	end,
+	},
+
+	update = {
+		function(w, e, dt)
+			e:update(dt)
+		end,
+	},
+
+	draw = {
+		function(w, e)
+			if e.x and e.y and e.w and e.h then
+				love.graphics.setColor(255, 255, 255)
+				love.graphics.rectangle('fill', e.x, e.y, e.w, e.h)
+			end
+		end,
+		function(w, e)
+			if e.x and e.y then
+				love.graphics.setColor(255, 0, 0)
+				love.graphics.circle('fill', e.x, e.y, 8)
+			end
+		end,
+	},
 }
 
 world:add(newSquare(50, 50), 'hi')

@@ -53,9 +53,9 @@ function World:remove(f)
 	end
 end
 
-function ochre.new()
+function ochre.new(systems)
 	return setmetatable({
-		systems = {},
+		systems = systems or {},
 		_entities = {},
 	}, {
 		__index = World,
