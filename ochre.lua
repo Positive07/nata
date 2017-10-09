@@ -47,7 +47,6 @@ function World:remove(f)
 	for i = #self._entities, 1, -1 do
 		if f(self._entities[i]) then
 			self:call(self._entities[i], 'onRemove')
-			self:onRemove(self._entities[i])
 			table.remove(self._entities, i)
 		end
 	end
