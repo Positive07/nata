@@ -18,7 +18,7 @@ function newSquare(x, y)
 	}
 end
 
-local world = ochre.new(ochre.systems.simple)
+local world = ochre.new()
 
 world:add(newSquare(50, 50))
 world:add(newSquare(50, 250))

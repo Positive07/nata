@@ -53,34 +53,32 @@ function World:remove(f)
 	end
 end
 
+defaultSystems = {
+	update = {
+		function(w, e, dt)
+			if e.update then e:update(dt) end
+		end
+	},
+	draw = {
+		function(w, e)
+			if e.draw then e:draw() end
+		end
+	},
+	onRemove = {
+		function(w, e)
+			if e.onRemove then e:onRemove() end
+		end
+	},
+}
+
 function ochre.new(systems)
 	return setmetatable({
-		systems = systems or {},
+		systems = systems or defaultSystems,
 		parent = self,
 		_entities = {},
 	}, {
 		__index = World,
 	})
 end
-
-ochre.systems = {
-	simple = {
-		update = {
-			function(w, e, dt)
-				if e.update then e:update(dt) end
-			end
-		},
-		draw = {
-			function(w, e)
-				if e.draw then e:draw() end
-			end
-		},
-		onRemove = {
-			function(w, e)
-				if e.onRemove then e:onRemove() end
-			end
-		},
-	}
-}
 
 return ochre
