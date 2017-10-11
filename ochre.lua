@@ -37,8 +37,12 @@ function World:call(entity, event, ...)
 end
 
 function World:callAll(event, ...)
-	for _, entity in pairs(self._entities) do
-		self:call(entity, event, ...)
+	if self.systems[event] then
+		for _, system in ipairs(self.systems[event]) do
+			for _, entity in pairs(self._entities) do
+				system(self.parent, entity, ...)
+			end
+		end
 	end
 end
 
