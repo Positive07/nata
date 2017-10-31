@@ -56,23 +56,16 @@ function World:remove(f)
 end
 
 return function(systems)
-	local defaultSystems = {
-		update = {
-			function(e, ...)
-				if e.update then e:update(...) end
-			end
-		},
-		draw = {
-			function(e, ...)
-				if e.draw then e:draw(...) end
-			end
-		},
-		remove = {
-			function(e, ...)
-				if e.remove then e:remove(...) end
-			end
-		},
-	}
+	local defaultSystems = setmetatable({}, {
+		__index = function(t, k)
+			return {
+				function(e, ...)
+					if e[k] then e[k](e, ...) end
+				end
+			}
+		end
+	})
+
 	return setmetatable({
 		systems = systems or defaultSystems,
 		_entities = {},
