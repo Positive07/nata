@@ -1,5 +1,3 @@
-local ochre = {}
-
 local World = setmetatable({}, {
 	__index = function(self, k)
 		return rawget(self, k) or function(self, ...)
@@ -57,7 +55,7 @@ function World:remove(f)
 	end
 end
 
-function ochre.new(systems)
+return function(systems)
 	local defaultSystems = {
 		update = {
 			function(e, dt)
@@ -82,5 +80,3 @@ function ochre.new(systems)
 		__index = World,
 	})
 end
-
-return ochre
