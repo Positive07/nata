@@ -60,17 +60,17 @@ end
 function ochre.new(systems)
 	local defaultSystems = {
 		update = {
-			function(w, e, dt)
+			function(e, dt)
 				if e.update then e:update(dt) end
 			end
 		},
 		draw = {
-			function(w, e)
+			function(e)
 				if e.draw then e:draw() end
 			end
 		},
 		remove = {
-			function(w, e)
+			function(e)
 				if e.remove then e:remove() end
 			end
 		},
