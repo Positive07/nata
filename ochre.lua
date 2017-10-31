@@ -58,18 +58,18 @@ end
 return function(systems)
 	local defaultSystems = {
 		update = {
-			function(e, dt)
-				if e.update then e:update(dt) end
+			function(e, ...)
+				if e.update then e:update(...) end
 			end
 		},
 		draw = {
-			function(e)
-				if e.draw then e:draw() end
+			function(e, ...)
+				if e.draw then e:draw(...) end
 			end
 		},
 		remove = {
-			function(e)
-				if e.remove then e:remove() end
+			function(e, ...)
+				if e.remove then e:remove(...) end
 			end
 		},
 	}
