@@ -106,7 +106,7 @@ end
 
 
 
-local pool = require('ochre')()
+local pool = require('nata')()
 
 pool:add(Class.Player(400-16, 300-16))
 

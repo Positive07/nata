@@ -1,4 +1,4 @@
-local World = setmetatable({}, {
+local Pool = setmetatable({}, {
 	__index = function(self, k)
 		return rawget(self, k) or function(self, ...)
 			self:callAll(k, ...)
@@ -6,13 +6,13 @@ local World = setmetatable({}, {
 	end
 })
 
-function World:add(entity, ...)
+function Pool:add(entity, ...)
 	self:call(entity, 'add', ...)
 	table.insert(self._entities, entity)
 	return entity
 end
 
-function World:get(f)
+function Pool:get(f)
 	if f then
 		local entities = {}
 		for _, entity in pairs(self._entities) do
@@ -26,7 +26,7 @@ function World:get(f)
 	end
 end
 
-function World:call(entity, event, ...)
+function Pool:call(entity, event, ...)
 	if self.systems[event] then
 		for _, system in ipairs(self.systems[event]) do
 			system(entity, ...)
@@ -34,7 +34,7 @@ function World:call(entity, event, ...)
 	end
 end
 
-function World:callAll(event, ...)
+function Pool:callAll(event, ...)
 	if self.systems[event] then
 		for _, system in ipairs(self.systems[event]) do
 			for _, entity in pairs(self._entities) do
@@ -44,7 +44,7 @@ function World:callAll(event, ...)
 	end
 end
 
-function World:remove(f)
+function Pool:remove(f)
 	f = f or function() return true end
 	for i = #self._entities, 1, -1 do
 		local entity = self._entities[i]
@@ -70,6 +70,6 @@ return function(systems)
 		systems = systems or defaultSystems,
 		_entities = {},
 	}, {
-		__index = World,
+		__index = Pool,
 	})
 end
