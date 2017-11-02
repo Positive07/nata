@@ -54,7 +54,9 @@ return function(systems)
 		__index = function(t, k)
 			return {
 				function(e, ...)
-					if e[k] then e[k](e, ...) end
+					if e[k] and type(e[k]) == 'function' then
+						e[k](e, ...)
+					end
 				end
 			}
 		end
