@@ -2,7 +2,13 @@ local bump = require 'bump'
 
 
 
-local System = {Add = {}, Do = {}, Update = {}, Draw = {}}
+local System = {
+	Add = {},
+	Do = {},
+	Update = {},
+	Keypressed = {},
+	Draw = {}
+}
 
 function System.Add.Physical(e, physics)
 	if not e.physical then
@@ -27,7 +33,17 @@ function System.Update.Velocity(e, physics, dt)
 		return false
 	end
 	local x, y = physics:getRect(e)
-	physics:move(e, x + e.vx * dt, y + e.vy * dt)
+	local _, _, cols = physics:move(e, x + e.vx * dt, y + e.vy * dt)
+	for _, col in ipairs(cols) do
+		if col.other.physical.solid then
+			if col.normal.x ~= 0 then
+				e.vx = 0
+			end
+			if col.normal.y ~= 0 then
+				e.vy = 0
+			end
+		end
+	end
 end
 
 function System.Update.Gravity(e, physics, dt)
@@ -45,6 +61,28 @@ function System.Update.Gravity(e, physics, dt)
 	if #cols > 0 then
 		e._onGround = true
 		e.vy = 0
+	end
+end
+
+function System.Update.Player(e, physics, dt)
+	if not (e.player) then
+		return false
+	end
+	if love.keyboard.isDown 'left' then
+		e.vx = e.vx - e.player.runSpeed * dt
+	end
+	if love.keyboard.isDown 'right' then
+		e.vx = e.vx + e.player.runSpeed * dt
+	end
+	e.vx = e.vx - e.vx * e.player.friction * dt
+end
+
+function System.Keypressed.Player(e, physics, key)
+	if not (e.player) then
+		return false
+	end
+	if key == 'up' then
+		System.Do.Jump(e, physics)
 	end
 end
 
@@ -87,6 +125,7 @@ function Entity.Player(x, y)
 		vy = 0,
 		gravity = 1000,
 		jumpPower = 500,
+		player = {runSpeed = 800, friction = 2},
 	}
 end
 
@@ -100,22 +139,29 @@ local pool = require 'nata' {
 	update = {
 		System.Update.Velocity,
 		System.Update.Gravity,
+		System.Update.Player,
+	},
+	keypressed = {
+		System.Keypressed.Player,
 	},
 	draw = {
 		System.Draw.Physical,
 	}
 }
 pool:add(Entity.Wall(0, 500, 800, 20), physics)
-local player = pool:add(Entity.Player(400, 300), physics)
+pool:add(Entity.Wall(0, 200, 800, 20), physics)
+pool:add(Entity.Wall(0, 0, 20, 600), physics)
+pool:add(Entity.Wall(780, 0, 20, 600), physics)
+pool:add(Entity.Wall(400, 350, 400, 150), physics)
+pool:add(Entity.Wall(300, 450, 100, 50), physics)
+local player = pool:add(Entity.Player(200, 300), physics)
 
 function love.update(dt)
 	pool:update(physics, dt)
 end
 
 function love.keypressed(key)
-	if key == 'up' then
-		System.Do.Jump(player, physics)
-	end
+	pool:keypressed(physics, key)
 end
 
 function love.draw()
