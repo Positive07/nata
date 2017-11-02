@@ -57,7 +57,7 @@ ECS style is almost exactly the same as OOP style, except you pass a list of sys
 ```lua
 pool = nata(systems)
 ```
-Each system is a table with a filter function and a function for each event it should respond to. Each event function will receive an entity first, followed by any additional arguments passed to `pool.call`, `pool.callOn`, `pool.add`, or `pool.remove`. For example, a gravity system might look like this:
+Each system is a table with an optional filter function and a function for each event it should respond to. Each event function will receive an entity first, followed by any additional arguments passed to `pool.call`, `pool.callOn`, `pool.add`, or `pool.remove`. For example, a gravity system might look like this:
 ```lua
 GravitySystem = {
   filter = function(entity)

@@ -38,7 +38,10 @@ local Pool = {}
 function Pool:add(entity, ...)
 	for _, system in ipairs(self._systems) do
 		system._entities = system._entities or {}
-		if system.filter(entity) then
+		local filter = system.filter or function()
+			return true
+		end
+		if filter(entity) then
 			table.insert(system._entities, entity)
 		end
 	end
