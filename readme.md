@@ -53,36 +53,20 @@ pool:remove(f)
 Removes all the entities for which `f(entity)` returns true and calls the "remove" event on each entity that is removed.
 
 ## Usage - ECS style
-ECS style is almost exactly the same as OOP style, except you pass a table of systems to nata.
+ECS style is almost exactly the same as OOP style, except you pass a list of systems to nata.
 ```lua
 pool = nata(systems)
 ```
-The structure of the `systems` table will look something like this:
+Each system is a table with a filter function and a function for each event it should respond to. Each event function will receive an entity first, followed by any additional arguments passed to `pool.call`, `pool.callOn`, `pool.add`, or `pool.remove`. For example, a gravity system might look like this:
 ```lua
-systems = {
-  add = {
-    InitPositionSystem,
-  },
-  update = {
-    UpdateVelocitySystem,
-    UpdateGravitySystem,
-  },
-  draw = {
-    DrawHitboxSystem,
-    DrawSpriteSystem,
-  },
-  remove = {
-    SpawnParticlesSystem,
-  }
+GravitySystem = {
+  filter = function(entity)
+    return entity.vy and entity.gravity
+  end,
+  update = function(entity, dt)
+    entity.vy = entity.vy + entity.gravity * dt
+  end,
 }
-```
-Each system is a function that takes a variable number of arguments. The first argument will always be the entity the system is running on. Any additional arguments passed to `pool.call`, `pool.callOn`, or `pool.add` will be passed to the system. For example, a gravity system might look like this:
-```lua
-function UpdateVelocitySystem(entity, dt)
-  if entity.vy and entity.gravity then
-   entity.vy = entity.vy + entity.gravity * dt
- end
-end
 ```
 
 ## Contributing

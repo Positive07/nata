@@ -2,98 +2,84 @@ local bump = require 'bump'
 
 
 
-local System = {
-	Add = {},
-	Do = {},
-	Update = {},
-	Keypressed = {},
-	Draw = {}
+local System = {}
+
+System.Physical = {
+	filter = function(e)
+		return e.physical
+	end,
+	add = function(e, physics)
+		physics:add(e, e.physical.x, e.physical.y,
+			e.physical.w, e.physical.h)
+	end,
+	draw = function(e, physics)
+		if e.physical.draw then
+			love.graphics.setColor(e.physical.draw.color)
+			love.graphics.rectangle(e.physical.draw.mode,
+				physics:getRect(e))
+		end
+	end,
 }
 
-function System.Add.Physical(e, physics)
-	if not e.physical then
-		return false
-	end
-	physics:add(e, e.physical.x, e.physical.y,
-		e.physical.w, e.physical.h)
-end
-
-function System.Do.Jump(e, physics)
-	if not (e.physical and e.vx and e.vy and e.gravity
-		and e.jumpPower) then
-		return false
-	end
-	if e._onGround then
-		e.vy = -e.jumpPower
-	end
-end
-
-function System.Update.Velocity(e, physics, dt)
-	if not (e.physical and e.vx and e.vy) then
-		return false
-	end
-	local x, y = physics:getRect(e)
-	local _, _, cols = physics:move(e, x + e.vx * dt, y + e.vy * dt)
-	for _, col in ipairs(cols) do
-		if col.other.physical.solid then
-			if col.normal.x ~= 0 then
-				e.vx = 0
-			end
-			if col.normal.y ~= 0 then
-				e.vy = 0
+System.Velocity = {
+	filter = function(e)
+		return e.physical and e.vx and e.vy
+	end,
+	update = function(e, physics, dt)
+		local x, y = physics:getRect(e)
+		local _, _, cols = physics:move(e, x + e.vx * dt, y + e.vy * dt)
+		for _, col in ipairs(cols) do
+			if col.other.physical.solid then
+				if col.normal.x ~= 0 then
+					e.vx = 0
+				end
+				if col.normal.y ~= 0 then
+					e.vy = 0
+				end
 			end
 		end
-	end
-end
+	end,
+}
 
-function System.Update.Gravity(e, physics, dt)
-	if not (e.physical and e.vx and e.vy and e.gravity) then
-		return false
-	end
-	e.vy = e.vy + e.gravity * dt
-	local x, y = physics:getRect(e)
-	local _, _, cols = physics:check(e, x, y + 1, function(_, other)
-		if other.physical.solid then
-			return 'slide'
+System.Gravity = {
+	filter = function(e)
+		return e.physical and e.vx and e.vy and e.gravity
+	end,
+	update = function(e, physics, dt)
+		e.vy = e.vy + e.gravity * dt
+		local x, y = physics:getRect(e)
+		local _, _, cols = physics:check(e, x, y + 1, function(_, other)
+			if other.physical.solid then
+				return 'slide'
+			end
+		end)
+		e._onGround = false
+		if #cols > 0 then
+			e._onGround = true
+			e.vy = 0
 		end
-	end)
-	e._onGround = false
-	if #cols > 0 then
-		e._onGround = true
-		e.vy = 0
-	end
-end
+	end,
+}
 
-function System.Update.Player(e, physics, dt)
-	if not (e.player) then
-		return false
+System.Player = {
+	filter = function(e)
+		return e.player
+	end,
+	update = function(e, physics, dt)
+		if love.keyboard.isDown 'left' then
+			e.vx = e.vx - e.player.runSpeed * dt
+		end
+		if love.keyboard.isDown 'right' then
+			e.vx = e.vx + e.player.runSpeed * dt
+		end
+		e.vx = e.vx - e.vx * e.player.friction * dt
+	end,
+	keypressed = function(e, physics, key)
+		if key == 'up' and e._onGround then
+			e.vy = -e.jumpPower
+		end
 	end
-	if love.keyboard.isDown 'left' then
-		e.vx = e.vx - e.player.runSpeed * dt
-	end
-	if love.keyboard.isDown 'right' then
-		e.vx = e.vx + e.player.runSpeed * dt
-	end
-	e.vx = e.vx - e.vx * e.player.friction * dt
-end
-
-function System.Keypressed.Player(e, physics, key)
-	if not (e.player) then
-		return false
-	end
-	if key == 'up' then
-		System.Do.Jump(e, physics)
-	end
-end
-
-function System.Draw.Physical(e, physics)
-	if not (e.physical and e.physical.draw) then
-		return false
-	end
-	love.graphics.setColor(e.physical.draw.color)
-	love.graphics.rectangle(e.physical.draw.mode,
-		physics:getRect(e))
-end
+}
 
 
 
@@ -133,20 +119,10 @@ end
 
 local physics = bump.newWorld()
 local pool = require 'nata' {
-	add = {
-		System.Add.Physical,
-	},
-	update = {
-		System.Update.Velocity,
-		System.Update.Gravity,
-		System.Update.Player,
-	},
-	keypressed = {
-		System.Keypressed.Player,
-	},
-	draw = {
-		System.Draw.Physical,
-	}
+	System.Physical,
+	System.Velocity,
+	System.Gravity,
+	System.Player,
 }
 pool:add(Entity.Wall(0, 500, 800, 20), physics)
 pool:add(Entity.Wall(0, 200, 800, 20), physics)
