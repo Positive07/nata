@@ -157,15 +157,15 @@ pool:add(Entity.Wall(300, 450, 100, 50), physics)
 local player = pool:add(Entity.Player(200, 300), physics)
 
 function love.update(dt)
-	pool:update(physics, dt)
+	pool:call('update', physics, dt)
 end
 
 function love.keypressed(key)
-	pool:keypressed(physics, key)
+	pool:call('keypressed', physics, key)
 end
 
 function love.draw()
-	pool:draw(physics)
+	pool:call('draw', physics)
 	love.graphics.setColor(255, 255, 255)
 	love.graphics.print('On ground: ' .. tostring(player._onGround))
 end

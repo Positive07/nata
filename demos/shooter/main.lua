@@ -14,7 +14,7 @@ function Class.Player:new(x, y)
 	self.reloadTimer = 0
 end
 
-function Class.Player:update(dt, entities)
+function Class.Player:update(dt, pool)
 	local speed = 300
 	if love.keyboard.isDown 'left' then
 		self.x = self.x - speed * dt
@@ -32,7 +32,7 @@ function Class.Player:update(dt, entities)
 	self.reloadTimer = self.reloadTimer - dt
 	if love.keyboard.isDown 'x' and self.reloadTimer <= 0 then
 		self.reloadTimer = 1/8
-		entities:add(Class.PlayerBullet(self.x+16-2, self.y+16-8))
+		pool:add(Class.PlayerBullet(self.x+16-2, self.y+16-8))
 	end
 end
 
@@ -128,7 +128,7 @@ function love.update(dt)
 	end
 
 	-- update entities
-	pool:update(dt, pool)
+	pool:call('update', dt, pool)
 
 	-- process collisions
 	local entities = pool:get()
@@ -138,8 +138,8 @@ function love.update(dt)
 			local b = entities[j]
 			if CheckCollision(a.x, a.y, a.w, a.h,
 				b.x, b.y, b.w, b.h) then
-				pool:call(a, 'collide', b)
-				pool:call(b, 'collide', a)
+				pool:callOn(a, 'collide', b)
+				pool:callOn(b, 'collide', a)
 			end
 		end
 	end
@@ -151,7 +151,7 @@ function love.update(dt)
 end
 
 function love.draw()
-	pool:draw()
+	pool:call('draw')
 	love.graphics.setColor(255, 255, 255)
 	love.graphics.print('Total entities: '..#pool:get())
 end
