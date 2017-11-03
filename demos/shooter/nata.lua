@@ -66,7 +66,10 @@ end
 
 function Pool:callOn(entity, event, ...)
 	for _, system in ipairs(self._systems) do
-		if system.filter(entity) and system[event] then
+		local filter = system.filter or function()
+			return true
+		end
+		if filter(entity) and system[event] then
 			system[event](entity, ...)
 		end
 	end
@@ -97,9 +100,7 @@ function Pool:remove(f, ...)
 end
 
 return function(systems)
-	local passthroughSystem = setmetatable({
-		filter = function() return true end,
-	}, {
+	local passthroughSystem = setmetatable({}, {
 		__index = function(self, k)
 			if k == 'filter' or k == 'add' then
 				return rawget(self, k)
