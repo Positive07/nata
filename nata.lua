@@ -66,7 +66,7 @@ end
 
 function Pool:callOn(entity, event, ...)
 	for _, system in ipairs(self._systems) do
-		if system._entities and system[event] then
+		if system._entities and system.filter(entity) and system[event] then
 			system[event](entity, ...)
 		end
 	end
