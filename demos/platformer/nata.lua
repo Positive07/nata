@@ -37,12 +37,12 @@ local Pool = {}
 
 function Pool:add(entity, ...)
 	for _, system in ipairs(self._systems) do
-		system._entities = system._entities or {}
+		self._cache[system] = self._cache[system] or {}
 		local filter = system.filter or function()
 			return true
 		end
 		if filter(entity) then
-			table.insert(system._entities, entity)
+			table.insert(self._cache[system], entity)
 		end
 	end
 	table.insert(self._entities, entity)
@@ -66,7 +66,7 @@ end
 
 function Pool:callOn(entity, event, ...)
 	for _, system in ipairs(self._systems) do
-		if system._entities and system.filter(entity) and system[event] then
+		if system.filter(entity) and system[event] then
 			system[event](entity, ...)
 		end
 	end
@@ -74,8 +74,8 @@ end
 
 function Pool:call(event, ...)
 	for _, system in ipairs(self._systems) do
-		if system._entities and system[event] then
-			for _, entity in ipairs(system._entities) do
+		if self._cache[system] and system[event] then
+			for _, entity in ipairs(self._cache[system]) do
 				system[event](entity, ...)
 			end
 		end
@@ -89,7 +89,7 @@ function Pool:remove(f, ...)
 		if f(entity) then
 			self:callOn(entity, 'remove', ...)
 			for _, system in ipairs(self._systems) do
-				remove(system._entities, entity)
+				remove(self._cache[system], entity)
 			end
 			table.remove(self._entities, i)
 		end
@@ -101,7 +101,7 @@ return function(systems)
 		filter = function() return true end,
 	}, {
 		__index = function(self, k)
-			if k == 'filter' or k == 'add' or k == '_entities' then
+			if k == 'filter' or k == 'add' then
 				return rawget(self, k)
 			else
 				return function(e, ...)
@@ -116,6 +116,7 @@ return function(systems)
 	return setmetatable({
 		_systems = systems or {passthroughSystem},
 		_entities = {},
+		_cache = {},
 	}, {
 		__index = Pool,
 	})
