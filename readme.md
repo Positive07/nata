@@ -14,7 +14,7 @@ nata = require 'path.to.nata' -- if it's in subfolders
 
 ### Creating an entity pool
 ```lua
-pool = nata()
+pool = nata.new()
 ```
 
 ### Adding an entity to the pool
@@ -55,7 +55,7 @@ Removes all the entities for which `f(entity)` returns true and calls the "remov
 ## Usage - ECS style
 ECS style is almost exactly the same as OOP style, except you pass a list of systems to nata.
 ```lua
-pool = nata(systems)
+pool = nata.new(systems)
 ```
 Each system is a table with an optional filter function and a function for each event it should respond to. Each event function will receive an entity first, followed by any additional arguments passed to `pool.call`, `pool.callOn`, `pool.add`, or `pool.remove`. For example, a gravity system might look like this:
 ```lua
@@ -68,6 +68,7 @@ GravitySystem = {
   end,
 }
 ```
+Nata's OOP functionality is implemented as a single system that passes every event (except for "filter" and "add") to the entity. If you want to use this system in combination with other systems, add `nata.oop` to the `systems` table.
 
 ## Contributing
 This library is in very early development. Feel free to make suggestions about the design. Issues and pull requests are always welcome.

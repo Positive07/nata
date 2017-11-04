@@ -1,4 +1,5 @@
 local bump = require 'bump'
+local nata = require 'nata'
 
 
 
@@ -118,7 +119,7 @@ end
 
 
 local physics = bump.newWorld()
-local pool = require 'nata' {
+local pool = nata.new {
 	System.Physical,
 	System.Velocity,
 	System.Gravity,

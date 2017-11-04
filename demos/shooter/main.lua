@@ -1,3 +1,4 @@
+local nata = require 'nata'
 local Object = require 'classic'
 
 local Class = {}
@@ -106,7 +107,7 @@ end
 
 
 
-local pool = require('nata')()
+local pool = nata.new()
 
 pool:add(Class.Player(400-16, 300-16))
 
