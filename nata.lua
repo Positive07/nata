@@ -67,6 +67,13 @@ function Pool:get(f)
 	end
 end
 
+function Pool:sort(f)
+	table.sort(self._entities, f)
+	for _, system in ipairs(self._systems) do
+		table.sort(self._cache[system], f)
+	end
+end
+
 function Pool:callOn(entity, event, ...)
 	for _, system in ipairs(self._systems) do
 		local filter = system.filter or function()

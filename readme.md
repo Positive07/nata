@@ -46,6 +46,12 @@ end)
 ```
 If no function is provided, `pool:get()` will return every entity.
 
+### Sorting entities
+```lua
+pool:sort(f)
+```
+Sorts the entities according to the function `f`. This works just like `table.sort`.
+
 ### Removing entities
 ```lua
 pool:remove(f)
