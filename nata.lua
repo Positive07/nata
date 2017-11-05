@@ -79,6 +79,8 @@ function Pool:call(event, ...)
     end
 end
 
+function Pool:sort(f) table.sort(self._entities, f) end
+
 nata.oop = setmetatable({}, {
 	__index = function(self, k)
 		if k == 'filter' or k == 'add' then
