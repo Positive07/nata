@@ -7,10 +7,14 @@ function Pool:add(entity, ...)
         local system = self._systems[i]
         local filter = system.filter or function()
             return true
-        end
-        if system.add and filter(entity) then
-            system.add(entity, ...)
-        end
+		end
+		if filter(entity) then
+			self._cache[system] = self._cache[system] or {}
+			table.insert(self._cache[system], entity)
+			if system.add then
+				system.add(entity, ...)
+			end
+		end
     end
     table.insert(self._entities, entity)
     return entity
@@ -22,13 +26,18 @@ function Pool:remove(f, ...)
         local entity = self._entities[i]
         if f(entity) then
             for j = 1, #self._systems do
-                local system = self._systems[j]
+				local system = self._systems[j]
                 local filter = system.filter or function()
                     return true
                 end
                 if system.remove and filter(entity) then
                     system.remove(entity, ...)
-                end
+				end
+				for k = #self._cache[system], 1, -1 do
+					if self._cache[system][k] == entity then
+						table.remove(self._cache[system], k)
+					end
+				end
             end
             table.remove(self._entities, i)
         end
@@ -66,20 +75,21 @@ function Pool:call(event, ...)
     for i = 1, #self._systems do
         local system = self._systems[i]
         if system[event] then
-            for j = 1, #self._entities do
-                local entity = self._entities[j]
-                local filter = system.filter or function()
-                    return true
-                end
-                if filter(entity) then
-                    system[event](entity, ...)
-                end
+            for j = 1, #self._cache[system] do
+                local entity = self._cache[system][j]
+				system[event](entity, ...)
             end
         end
     end
 end
 
-function Pool:sort(f) table.sort(self._entities, f) end
+function Pool:sort(f)
+	table.sort(self._entities, f)
+	for i = 1, #self._systems do
+		local system = self._systems[i]
+		table.sort(self._cache[system], f)
+	end
+end
 
 nata.oop = setmetatable({}, {
 	__index = function(self, k)
@@ -98,7 +108,8 @@ nata.oop = setmetatable({}, {
 function nata.new(systems)
     return setmetatable({
         _systems = systems or {nata.oop},
-        _entities = {},
+		_entities = {},
+		_cache = {},
     }, {__index = Pool})
 end
 
