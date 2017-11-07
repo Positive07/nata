@@ -135,7 +135,7 @@ end
 
 nata.oop = setmetatable({}, {
 	__index = function(self, k)
-		if k == 'filter' or k == 'add' then
+		if k == 'filter' then
 			return rawget(self, k)
 		else
 			return function(e, ...)
