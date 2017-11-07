@@ -29,33 +29,21 @@ local nata = {
 
 local Pool = {}
 
-function Pool:_flushQueue()
-	for i = 1, #self._queue do
-		local entity = self._queue[i]
-		self:add(entity[1], unpack(entity[2]))
-	end
-	self._queue = {}
-end
-
 function Pool:add(entity, ...)
-	if self._calling then
-		table.insert(self._queue, {entity, {...}})
-	else
-		for i = 1, #self._systems do
-			local system = self._systems[i]
-			local filter = system.filter or function()
-				return true
-			end
-			if filter(entity) then
-				self._cache[system] = self._cache[system] or {}
-				table.insert(self._cache[system], entity)
-				if system.add then
-					system.add(entity, ...)
-				end
+	for i = 1, #self._systems do
+		local system = self._systems[i]
+		local filter = system.filter or function()
+			return true
+		end
+		if filter(entity) then
+			self._cache[system] = self._cache[system] or {}
+			table.insert(self._cache[system], entity)
+			if system.add then
+				system.add(entity, ...)
 			end
 		end
-		table.insert(self._entities, entity)
 	end
+	table.insert(self._entities, entity)
 	return entity
 end
 
@@ -111,7 +99,6 @@ function Pool:callOn(entity, event, ...)
 end
 
 function Pool:call(event, ...)
-	self._calling = true
 	for i = 1, #self._systems do
 		local system = self._systems[i]
 		if system[event] then
@@ -121,8 +108,6 @@ function Pool:call(event, ...)
 			end
 		end
 	end
-	self._calling = false
-	self:_flushQueue()
 end
 
 function Pool:sort(f)
