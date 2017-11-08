@@ -31,25 +31,25 @@ local function remove(t, v)
 	for i = 1, #t do
 		if t[i] == v then
 			table.remove(t, i)
-			break
+			return true
 		end
 	end
+	return false
 end
 
 local Pool = {}
 
 function Pool:add(entity, ...)
 	for _, system in ipairs(self._systems) do
-		self._cache[system] = self._cache[system] or {}
 		if not system.filter or system.filter(entity) then
 			table.insert(self._cache[system], entity)
-		end
-		if system.sort then
-			table.sort(self._cache[system], system.sort)
+			if system.sort then
+				table.sort(self._cache[system], system.sort)
+			end
+			if system.add then system.add(entity, ...) end
 		end
 	end
 	table.insert(self._entities, entity)
-	self:callOn(entity, 'add', ...)
 	return entity
 end
 
@@ -68,8 +68,16 @@ function Pool:get(f)
 end
 
 function Pool:sort(system)
-	assert(system.sort, 'system does not have a sort function')
-	table.sort(self._cache[system], system.sort)
+	if system then
+		assert(system.sort, 'system does not have a sort function')
+		table.sort(self._cache[system], system.sort)
+	else
+		for _, system in ipairs(self._systems) do
+			if system.sort then
+				table.sort(self._cache[system], system.sort)
+			end
+		end
+	end
 end
 
 function Pool:callOn(entity, event, ...)
@@ -84,7 +92,7 @@ end
 
 function Pool:call(event, ...)
 	for _, system in ipairs(self._systems) do
-		if self._cache[system] and system[event] then
+		if system[event] then
 			for _, entity in ipairs(self._cache[system]) do
 				system[event](entity, ...)
 			end
@@ -97,9 +105,10 @@ function Pool:remove(f, ...)
 	for i = #self._entities, 1, -1 do
 		local entity = self._entities[i]
 		if f(entity) then
-			self:callOn(entity, 'remove', ...)
 			for _, system in ipairs(self._systems) do
-				remove(self._cache[system], entity)
+				if remove(self._cache[system], entity) then
+					if system.remove then system.remove(entity, ...)
+				end
 			end
 			table.remove(self._entities, i)
 		end
@@ -121,13 +130,17 @@ nata.oop = setmetatable({}, {
 })
 
 function nata.new(systems)
-	return setmetatable({
+	local pool = setmetatable({
 		_systems = systems or {nata.oop},
 		_entities = {},
 		_cache = {},
 	}, {
 		__index = Pool,
 	})
+	for _, system in ipairs(pool._systems) do
+		pool._cache[system] = {}
+	end
+	return pool
 end
 
 return nata
