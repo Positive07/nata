@@ -41,10 +41,7 @@ local Pool = {}
 function Pool:add(entity, ...)
 	for _, system in ipairs(self._systems) do
 		self._cache[system] = self._cache[system] or {}
-		local filter = system.filter or function()
-			return true
-		end
-		if filter(entity) then
+		if not system.filter or system.filter(entity) then
 			table.insert(self._cache[system], entity)
 		end
 	end
@@ -76,11 +73,10 @@ end
 
 function Pool:callOn(entity, event, ...)
 	for _, system in ipairs(self._systems) do
-		local filter = system.filter or function()
-			return true
-		end
-		if filter(entity) and system[event] then
-			system[event](entity, ...)
+		if system[event] then
+			if not system.filter or system.filter(entity) then
+				system[event](entity, ...)
+			end
 		end
 	end
 end
