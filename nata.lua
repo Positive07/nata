@@ -49,22 +49,8 @@ function Pool:add(entity, ...)
 			if system.add then system.add(entity, ...) end
 		end
 	end
-	table.insert(self._entities, entity)
+	table.insert(self.entities, entity)
 	return entity
-end
-
-function Pool:get(f)
-	if f then
-		local entities = {}
-		for _, entity in pairs(self._entities) do
-			if f(entity) then
-				table.insert(entities, entity)
-			end
-		end
-		return entities
-	else
-		return self._entities
-	end
 end
 
 function Pool:sort(system)
@@ -102,15 +88,15 @@ end
 
 function Pool:remove(f, ...)
 	f = f or function() return true end
-	for i = #self._entities, 1, -1 do
-		local entity = self._entities[i]
+	for i = #self.entities, 1, -1 do
+		local entity = self.entities[i]
 		if f(entity) then
 			for _, system in ipairs(self._systems) do
 				if remove(self._cache[system], entity) then
 					if system.remove then system.remove(entity, ...) end
 				end
 			end
-			table.remove(self._entities, i)
+			table.remove(self.entities, i)
 		end
 	end
 end
@@ -134,7 +120,7 @@ end
 function nata.new(systems)
 	local pool = setmetatable({
 		_systems = systems or {nata.oop()},
-		_entities = {},
+		entities = {},
 		_cache = {},
 	}, {
 		__index = Pool,
