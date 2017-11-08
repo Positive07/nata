@@ -115,23 +115,25 @@ function Pool:remove(f, ...)
 	end
 end
 
-nata.oop = setmetatable({}, {
-	__index = function(self, k)
-		if k == 'filter' or k == 'sort' then
-			return rawget(self, k)
-		else
-			return function(e, ...)
-				if e[k] and type(e[k]) == 'function' then
-					e[k](e, ...)
+function nata.oop()
+	return setmetatable({}, {
+		__index = function(self, k)
+			if k == 'filter' or k == 'sort' then
+				return rawget(self, k)
+			else
+				return function(e, ...)
+					if e[k] and type(e[k]) == 'function' then
+						e[k](e, ...)
+					end
 				end
 			end
 		end
-	end
-})
+	})
+end
 
 function nata.new(systems)
 	local pool = setmetatable({
-		_systems = systems or {nata.oop},
+		_systems = systems or {nata.oop()},
 		_entities = {},
 		_cache = {},
 	}, {
