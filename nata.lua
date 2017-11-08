@@ -44,6 +44,9 @@ function Pool:add(entity, ...)
 		if not system.filter or system.filter(entity) then
 			table.insert(self._cache[system], entity)
 		end
+		if system.sort then
+			table.sort(self._cache[system], system.sort)
+		end
 	end
 	table.insert(self._entities, entity)
 	self:callOn(entity, 'add', ...)
@@ -64,11 +67,9 @@ function Pool:get(f)
 	end
 end
 
-function Pool:sort(f)
-	table.sort(self._entities, f)
-	for _, system in ipairs(self._systems) do
-		table.sort(self._cache[system], f)
-	end
+function Pool:sort(system)
+	assert(system.sort, 'system does not have a sort function')
+	table.sort(self._cache[system], system.sort)
 end
 
 function Pool:callOn(entity, event, ...)
@@ -107,7 +108,7 @@ end
 
 nata.oop = setmetatable({}, {
 	__index = function(self, k)
-		if k == 'filter' or k == 'add' then
+		if k == 'filter' or k == 'sort' then
 			return rawget(self, k)
 		else
 			return function(e, ...)
