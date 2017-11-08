@@ -107,7 +107,7 @@ function Pool:remove(f, ...)
 		if f(entity) then
 			for _, system in ipairs(self._systems) do
 				if remove(self._cache[system], entity) then
-					if system.remove then system.remove(entity, ...)
+					if system.remove then system.remove(entity, ...) end
 				end
 			end
 			table.remove(self._entities, i)
