@@ -1,46 +1,62 @@
 nata = require 'nata'
 
-UpdateSystem = {
-    update = function(e, dt)
-        e.time = e.time + dt
+uptime = 0
+
+startPositionSystem = {
+    add = function(e)
+        e.x = 400
+        e.y = 300
     end
 }
 
-VerticalWiggleSystem = {
-    filter = function(e) return e.wiggle end,
-
+horizontalMovementSystem = {
+    filter = function(e) return e.xspeed end,
     update = function(e, dt)
-        e.wiggle = e.wiggle + dt
+        e.x = 400 + 200 * math.sin(uptime * e.xspeed * .5)
     end
 }
 
-DrawSystem = {
+verticalMovementSystem = {
+    filter = function(e) return e.yspeed end,
+    update = function(e, dt)
+        e.y = 300 + 200 * math.sin(uptime * e.yspeed * .5)
+    end
+}
+
+drawSystem = {
+    filter = function(e) return e.color end,
     sort = function(a, b) return a.z > b.z end,
-
     draw = function(e)
         love.graphics.setColor(e.color)
-        local x = 400 + 200*math.sin(e.time)
-        local y = 300 + 100*math.sin(e.wiggle or 0)
-        love.graphics.circle('fill', x, y + e.y, 32, 64)
+        love.graphics.circle('fill', e.x, e.y, e.radius, 64)
     end
 }
 
 pool = nata.new {
-    UpdateSystem,
-    VerticalWiggleSystem,
-    DrawSystem,
+    startPositionSystem,
+    horizontalMovementSystem,
+    verticalMovementSystem,
+    nata.oop(),
+    drawSystem,
 }
 
-pool:add {z = 5, time = 0, y = 0, color = {100, 100, 100}}
-pool:add {z = 4, time = 1, y = 20, color = {150, 75, 100}}
-pool:add {z = 0, time = 2, y = 40, wiggle = 1, color = {75, 150, 100}}
-pool:add {z = 2, time = 3, y = 60, color = {100, 150, 75}}
-pool:add {z = 3, time = 4, y = 80, color = {100, 75, 150}}
+pool:add {z = 1, radius = 32, xspeed = 1, color = {150, 150, 150}}
+pool:add {z = 2, radius = 32, xspeed = 2, color = {200, 100, 150}}
+pool:add {z = 3, radius = 32, xspeed = 3, yspeed = .1, color = {100, 200, 150}}
+pool:add {z = 4, radius = 32, xspeed = 4, yspeed = .2, color = {100, 150, 200}}
+pool:add {z = 5, radius = 32, xspeed = 5, color = {150, 200, 100},
+    update = function(e, dt)
+        e.radius = 32 + 16 * math.sin(uptime)
+    end
+}
 
 function love.update(dt)
+    uptime = uptime + dt
     pool:call('update', dt)
 end
 
 function love.draw()
-    pool:call('draw')
+    pool:call 'draw'
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.print 'the gray circle should be on top'
 end
