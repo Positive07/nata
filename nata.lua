@@ -87,7 +87,7 @@ function Pool:call(event, ...)
 end
 
 function Pool:remove(f, ...)
-	f = f or function() return true end
+	assert(f and type(f) == 'function', 'no function provided for pool.remove')
 	for i = #self.entities, 1, -1 do
 		local entity = self.entities[i]
 		if f(entity) then
@@ -122,9 +122,7 @@ function nata.new(systems)
 		_systems = systems or {nata.oop()},
 		entities = {},
 		_cache = {},
-	}, {
-		__index = Pool,
-	})
+	}, {__index = Pool})
 	for _, system in ipairs(pool._systems) do
 		pool._cache[system] = {}
 	end
