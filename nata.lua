@@ -38,6 +38,7 @@ local function remove(t, v)
 end
 
 local Pool = {}
+Pool.__index = Pool
 
 function Pool:add(entity, ...)
 	for _, system in ipairs(self._systems) do
@@ -102,8 +103,9 @@ function Pool:remove(f, ...)
 end
 
 function nata.oop(events, sort)
-	local eventEnabled = {}
+	local eventEnabled
 	if events then
+		eventEnabled = {}
 		if type(events) == 'string' then
 			eventEnabled[events] = true
 		elseif type(events) == 'table' then
@@ -113,18 +115,12 @@ function nata.oop(events, sort)
 		else
 			assert 'events must be a string or table'
 		end
-	else
-		setmetatable(eventEnabled, {
-			__index = function(t, k)
-				return true
-			end
-		})
 	end
-	return setmetatable({sort = sort,}, {
+	return setmetatable({sort = sort}, {
 		__index = function(t, k)
 			if k == 'filter' or k == 'sort' then
 				return rawget(t, k)
-			elseif eventEnabled[k] then
+			elseif not eventEnabled or eventEnabled[k] then
 				return function(e, ...)
 					if e[k] and type(e[k]) == 'function' then
 						e[k](e, ...)
@@ -140,7 +136,7 @@ function nata.new(systems)
 		_systems = systems or {nata.oop()},
 		entities = {},
 		_cache = {},
-	}, {__index = Pool})
+	}, Pool)
 	for _, system in ipairs(pool._systems) do
 		pool._cache[system] = {}
 	end
