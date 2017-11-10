@@ -101,12 +101,30 @@ function Pool:remove(f, ...)
 	end
 end
 
-function nata.oop()
-	return setmetatable({}, {
-		__index = function(self, k)
+function nata.oop(events, sort)
+	local eventEnabled = {}
+	if events then
+		if type(events) == 'string' then
+			eventEnabled[events] = true
+		elseif type(events) == 'table' then
+			for _, event in ipairs(events) do
+				eventEnabled[event] = true
+			end
+		else
+			assert 'events must be a string or table'
+		end
+	else
+		setmetatable(eventEnabled, {
+			__index = function(t, k)
+				return true
+			end
+		})
+	end
+	return setmetatable({sort = sort,}, {
+		__index = function(t, k)
 			if k == 'filter' or k == 'sort' then
-				return rawget(self, k)
-			else
+				return rawget(t, k)
+			elseif eventEnabled[k] then
 				return function(e, ...)
 					if e[k] and type(e[k]) == 'function' then
 						e[k](e, ...)
