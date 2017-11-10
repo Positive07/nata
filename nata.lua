@@ -113,7 +113,7 @@ function nata.oop(events, sort)
 				eventEnabled[event] = true
 			end
 		else
-			assert 'events must be a string or table'
+			error 'events must be a string or table'
 		end
 	end
 	return setmetatable({sort = sort}, {
