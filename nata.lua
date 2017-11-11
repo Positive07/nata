@@ -27,14 +27,27 @@ local nata = {
 	]]
 }
 
-local function remove(t, v)
-	for i = 1, #t do
-		if t[i] == v then
-			table.remove(t, i)
-			return true
+local function remove (entities, callback, system, ...)
+	local length = #entities
+	local left, j = length, 1
+
+	for i = 1, length do
+		local entity = entities[i]
+		if callback(entity) then
+			if system and system.remove then
+				system.remove(entity, ...)
+			end
+
+			left = left - 1
+		else
+			entities[j] = entity
+			j = j + 1
 		end
 	end
-	return false
+
+	for i = left + 1, length do
+		entities[i] = nil
+	end
 end
 
 local Pool = {}
@@ -89,16 +102,9 @@ end
 
 function Pool:remove(f, ...)
 	assert(f and type(f) == 'function', 'no function provided for pool.remove')
-	for i = #self.entities, 1, -1 do
-		local entity = self.entities[i]
-		if f(entity) then
-			for _, system in ipairs(self._systems) do
-				if remove(self._cache[system], entity) then
-					if system.remove then system.remove(entity, ...) end
-				end
-			end
-			table.remove(self.entities, i)
-		end
+	remove(self.entities, f)
+	for _, system in ipairs(self._systems) do
+		remove(self._cache[system], f, system, ...)
 	end
 end
 
